@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            color: #fff;
+            font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            gap: 40px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        video {
+            width: min(90vw, 800px);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>тестирую</h1>
+
+    <video controls autoplay muted loop>
+        <source src="video.mp4" type="video/mp4">
+        Твой браузер не поддерживает видео.
+    </video>
+</body>
+</html>
