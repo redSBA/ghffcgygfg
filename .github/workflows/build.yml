@@ -37,10 +37,22 @@ jobs:
             .buildozer
           key: buildozer-${{ hashFiles('buildozer.spec') }}
 
+      - name: Fix sdkmanager path
+        run: |
+          # Создаём симлинк для sdkmanager, чтобы buildozer его нашёл
+          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+          if [ -f ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager ]; then
+            ln -sf ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+                   ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+          fi
+
       - name: Accept Android licenses
         run: |
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          yes | sdkmanager --licenses || true
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # Создаём файлы лицензий вручную (обходной путь)
+          echo -e "\n8933bad161af4b6a5b573652ffc7aaf3aee85a47" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "\nd56f5187479451eabf01fb78af6dfcb131b33910" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
 
       - name: Build APK
         run: yes | buildozer -v android debug
