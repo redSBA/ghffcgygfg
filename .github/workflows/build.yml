@@ -11,13 +11,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build with Buildozer Docker
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install system deps
         run: |
-          docker run --rm \
-            -v "$PWD":/home/user/hostcwd \
-            -v ~/.buildozer:/home/user/.buildozer \
-            kivy/buildozer:latest \
-            android debug
+          sudo apt update
+          sudo apt install -y \
+            openjdk-17-jdk unzip zip git \
+            autoconf automake libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev \
+            cmake libffi-dev libssl-dev
+
+      - name: Install Buildozer
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython virtualenv
+
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+
+      - name: Fix sdkmanager path
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+          if [ -f ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager ]; then
+            ln -sf ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+                   ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+          fi
+
+      - name: Install build-tools manually
+        run: |
+          SDK=~/.buildozer/android/platform/android-sdk
+          if [ -f "$SDK/cmdline-tools/latest/bin/sdkmanager" ]; then
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" "build-tools;34.0.0" --licenses || true
+          fi
+
+      - name: Accept Android licenses
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "\n8933bad161af4b6a5b573652ffc7aaf3aee85a47" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "\nd56f5187479451eabf01fb78af6dfcb131b33910" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+
+      - name: Build APK
+        run: yes | buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
